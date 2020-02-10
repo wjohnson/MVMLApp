@@ -25,6 +25,8 @@ A Minimum Viable Machine Learning Application through Azure ML
 ## Instructions
 
 * Create an Azure Machine Learning Workspace in the Azure Portal
+* Create a virtualenv using `requirements.txt` for everything except training and testing the model.
+  * Create a virtualenv using `modeling.requirements.txt` if you'd like to run `train.py` and `test-call.py` as it requires the Keras library's MNIST dataset.
 * Look up the following and save the contents in a .env file in the root of your directory:
 
       workspace_name=YOUR_WORKSPACE_NAME
