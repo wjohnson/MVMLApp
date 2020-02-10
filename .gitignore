@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.vscode
+# release-service.py creates this file with keys
+service_details.json
 
 # C extensions
 *.so
