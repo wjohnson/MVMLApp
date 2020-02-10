@@ -89,9 +89,9 @@ ruamel.yaml==0.15.89
 scipy==1.4.1
 SecretStorage==3.1.2
 six==1.11.0
-tensorboard==1.13.1
-tensorflow==1.13.2
-tensorflow-estimator==1.13.0
+tensorboard==1.15.0
+tensorflow>=1.15.2
+tensorflow-estimator==1.15.1
 termcolor==1.1.0
 typed-ast==1.1.0
 uamqp==1.1.0
