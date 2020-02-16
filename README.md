@@ -16,7 +16,11 @@ A Minimum Viable Machine Learning Application through Azure ML
     release-service.py AKS_SERVICE_NAME WEB_SERVICE_NAME CONTAINER_NAME CONTAINER_VERSION:
         Creates a web service on the give AKS compute target for the given container version.
     loadws.py: 
-        A utility module to centralize loading the workspace
+        A utility module to centralize loading the workspace.
+    release-local.py
+        Creates a web service locally for debugging but requires docker.
+    test-make-data.py
+        A quick Keras command to export some testing data.
     test-call.py --uri AKS_URI --key AKS_KEY
         A utility module to test calling the AKS web service.
 

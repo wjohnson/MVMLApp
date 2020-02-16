@@ -1,8 +1,8 @@
 import os, json, datetime, sys
 
-from azureml.core import Workspace
-from azureml.core.model import Model
-from azureml.core.image import Image
+from azureml.core import Workspace, Environment
+from azureml.core.model import Model, InferenceConfig
+from azureml.core.conda_dependencies import CondaDependencies
 from azureml.core.webservice import Webservice
 from azureml.core.webservice import AksWebservice
 from azureml.core.compute import AksCompute, ComputeTarget
@@ -12,18 +12,24 @@ from dotenv import load_dotenv
 
 
 if __name__ == "__main__":
+    load_dotenv()
+
     ws = load_workspace()
 
     aks_service_name = sys.argv[1]
     web_service_name = sys.argv[2]
-    image_name = sys.argv[3]
-    image_version = int(sys.argv[4])
+    model_name = sys.argv[3]
+    model_version = int(sys.argv[4])
     
+    # Grab the requested model
+    model_list = Model.list(workspace=ws)
+    model = None
+    
+    # Unpack the generator and look through the list to find your desired model
+    model, = (m for m in model_list if m.version==model_version and m.name==model_name)
+    print('Model picked: {} \nModel Description: {} \nModel Version: {}'.format(model.name, model.description, model.version))
 
-    images = Image.list(workspace=ws)
-    image, = (m for m in images if m.version==image_version and m.name == image_name)
-    print('Image used to deploy webservice on ACI: {}\nImage Version: {}\nImage Location = {}'.format(image.name, image.version, image.image_location))
-
+    # Set up Compute Target
     try:
         computeTargets = ComputeTarget.list(ws)
         aks_target, = (t for t in computeTargets if t.name == aks_service_name)
@@ -45,27 +51,55 @@ if __name__ == "__main__":
     aks_config = AksWebservice.deploy_configuration(
         autoscale_enabled=False,
         auth_enabled=True,
-        cpu_cores=1, 
-        memory_gb=2, 
+        cpu_cores=0.5, 
+        memory_gb=1, 
         description='Web service to deploy an uploaded model',
         enable_app_insights=True,
         num_replicas=2,
         gpu_cores=None,
-        compute_target_name="aks_ml_deployment"
+        compute_target_name=aks_service_name
     )
 
+    os.chdir('./score')
+    print("Creating environment")
+    aks_env = Environment(name=f'{web_service_name}_env')
+    aks_env.environment_variables = {"STORAGE_CONNECTION": os.getenv("STORAGE_CONNECTION")}
+    aks_env.python.conda_dependencies = CondaDependencies.create(
+        pip_packages=[
+        'azureml-defaults',
+        'azure-storage-blob',
+        'pynacl==1.2.1'
+        ],
+        conda_packages=[
+        'numpy',
+        'scikit-learn',
+        'tensorflow',
+        'keras'
+        ])
+    
+    inf_config = InferenceConfig(
+        entry_script="score.py",
+        environment=aks_env
+    )
+
+    print("Attempting to deploy model to web service")
     # Deploy this particular web service to your AKS cluster.
-    service = Webservice.deploy_from_image(
-        deployment_config=aks_config,
+    service = Model.deploy(
+        workspace=ws,
+        name=web_service_name, 
+        models=[model], 
+        inference_config=inf_config, 
+        deployment_config=aks_config, 
         deployment_target=aks_target,
-        image=image,
-        name=web_service_name,
-        workspace=ws
+        overwrite=True
     )
 
-    print("Attempting to deploy service:")
-    service.wait_for_deployment()
-    print('Deployed AKS Webservice: {} \nWebservice Uri: {}'.format(service.name, service.scoring_uri))
+    print("Waiting for deployment to complete:")
+    try:
+        service.wait_for_deployment()
+        print('Deployed AKS Webservice: {} \nWebservice Uri: {}'.format(service.name, service.scoring_uri))
+    except:
+        print(service.get_logs())
 
     try:
         service_key = service.get_keys()[0]
