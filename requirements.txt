@@ -27,7 +27,7 @@ cffi==1.14.0
 chardet==3.0.4
 cloudpickle==1.2.2
 contextlib2==0.6.0.post1
-cryptography==2.8
+cryptography==3.2
 distro==1.4.0
 docker==4.2.0
 dotnetcore2==2.1.13
