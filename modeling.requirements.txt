@@ -81,7 +81,7 @@ pyreadline==2.1
 pytest==3.10.1
 python-dateutil==2.8.0
 pytz==2019.3
-pywin32==227
+pywin32==301
 PyYAML==5.3
 requests==2.22.0
 requests-oauthlib==1.2.0
