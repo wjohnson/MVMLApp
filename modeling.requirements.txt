@@ -30,7 +30,7 @@ azureml-train-core==1.0.85
 azureml-train-restclients-hyperdrive==1.0.85
 backports.tempfile==1.0
 backports.weakref==1.0.post1
-certifi==2019.11.28
+certifi==2022.12.7
 cffi==1.12.3
 chardet==3.0.4
 cloudpickle==1.2.2
